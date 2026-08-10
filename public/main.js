@@ -210,7 +210,65 @@
         updateSidebarState();
       }
     });
+    scroller.addEventListener('dblclick', navigateByGutterDoubleClick);
+    scroller.addEventListener('mousedown', preventNavigationGestureDefault);
+    scroller.addEventListener('auxclick', navigateBySideButton);
     return scroller;
+  }
+
+  function navigateByGutterDoubleClick(event) {
+    if (!currentBook) {
+      return;
+    }
+
+    const direction = getGutterDirection(event.clientX);
+    if (direction !== 0) {
+      event.preventDefault();
+      window.getSelection()?.removeAllRanges();
+      changeChapter(currentBook.currentChapter + direction);
+    }
+  }
+
+  function preventNavigationGestureDefault(event) {
+    if (event.button === 3 || event.button === 4) {
+      event.preventDefault();
+      return;
+    }
+
+    // Text selection starts on the second mousedown, before dblclick fires.
+    if (event.button === 0 && event.detail >= 2 && getGutterDirection(event.clientX) !== 0) {
+      event.preventDefault();
+    }
+  }
+
+  function getGutterDirection(clientX) {
+    const article = document.querySelector('.reading-content');
+    if (!article) {
+      return 0;
+    }
+
+    const bounds = article.getBoundingClientRect();
+    const style = getComputedStyle(article);
+    const contentLeft = bounds.left + Number.parseFloat(style.paddingLeft || '0');
+    const contentRight = bounds.right - Number.parseFloat(style.paddingRight || '0');
+    if (clientX < contentLeft) {
+      return -1;
+    }
+    if (clientX > contentRight) {
+      return 1;
+    }
+    return 0;
+  }
+
+  function navigateBySideButton(event) {
+    if (!currentBook || (event.button !== 3 && event.button !== 4)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const offset = event.button === 3 ? -1 : 1;
+    changeChapter(currentBook.currentChapter + offset);
   }
 
   function renderReadingContent(article) {
