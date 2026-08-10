@@ -1,0 +1,53 @@
+{
+  "name": "mein-reader",
+  "displayName": "梅茵阅读器",
+  "icon": "public/Book.png",
+  "description": "显示在 VS Code 底部面板中的本地极简 TXT 阅读器。",
+  "version": "0.1.0",
+  "publisher": "unukalhai727",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Unukalhai727/MeinReader"
+  },
+  "private": true,
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "meinReader",
+          "title": "Mein",
+          "icon": "public/Book.svg"
+        }
+      ]
+    },
+    "views": {
+      "meinReader": [
+        {
+          "id": "meinReader.reader",
+          "name": "阅读器",
+          "icon": "public/Book.svg",
+          "type": "webview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "test": "npm run compile && node --test test/*.test.js",
+    "package": "npm run compile && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.95.0",
+    "@vscode/vsce": "^3.6.0",
+    "typescript": "^5.9.0"
+  }
+}
