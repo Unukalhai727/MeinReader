@@ -87,9 +87,17 @@
     app.replaceChildren();
 
     const view = element('main', 'home-view');
+    const header = element('header', 'home-header');
     const brand = element('div', 'brand');
     brand.append(icon('book'), textElement('span', '梅茵阅读器'));
-    view.append(brand);
+
+    const importButton = textElement('button', '导入书籍', 'import-button');
+    importButton.type = 'button';
+    importButton.addEventListener('click', () => {
+      importButton.disabled = true;
+      vscode.postMessage({ type: 'importBook' });
+    });
+    header.append(brand, importButton);
 
     const list = element('div', 'book-list');
     books.forEach((book) => {
@@ -127,14 +135,7 @@
       list.append(row);
     });
 
-    const importButton = textElement('button', '导入书籍', 'import-row');
-    importButton.type = 'button';
-    importButton.addEventListener('click', () => {
-      importButton.disabled = true;
-      vscode.postMessage({ type: 'importBook' });
-    });
-    list.append(importButton);
-    view.append(list);
+    view.append(header, list);
     app.append(view);
   }
 

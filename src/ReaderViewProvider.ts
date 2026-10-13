@@ -112,7 +112,7 @@ export class ReaderViewProvider implements vscode.WebviewViewProvider {
       canSelectMany: false,
       filters: { '文本文件': ['txt'] },
       openLabel: '导入书籍',
-      title: '导入 TXT 书籍',
+      title: '导入本地 TXT 书籍',
     });
 
     if (!selected?.[0]) {

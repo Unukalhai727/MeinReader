@@ -1,6 +1,9 @@
 :root {
   color-scheme: light dark;
-  --toolbar-height: 24px;
+  --toolbar-height: 32px;
+  --toolbar-action-height: 22px;
+  --toolbar-action-radius: var(--vscode-cornerRadius-medium, 5px);
+  --toolbar-action-border-width: var(--vscode-strokeThickness, 1px);
   --sidebar-width: min(320px, 86vw);
 }
 
@@ -14,6 +17,31 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-color: var(--vscode-scrollbarSlider-background) var(--vscode-scrollbar-background, transparent);
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner {
+  background: var(--vscode-scrollbar-background, transparent);
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: var(--vscode-cornerRadius-small, 4px);
+  background: var(--vscode-scrollbarSlider-background);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: var(--vscode-scrollbarSlider-activeBackground);
 }
 
 html,
@@ -81,16 +109,28 @@ button {
 }
 
 .home-view {
+  display: grid;
   width: min(720px, 100%);
   height: 100%;
   margin: 0 auto;
   padding: 14px 18px 24px;
-  overflow: auto;
+  overflow: hidden;
+  grid-template-rows: var(--toolbar-height) minmax(0, 1fr);
+}
+
+.home-header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  background: var(--vscode-panel-background, var(--vscode-editor-background));
 }
 
 .brand {
   display: flex;
-  height: 38px;
+  min-width: 0;
   align-items: center;
   gap: 9px;
   padding: 0 9px;
@@ -98,17 +138,60 @@ button {
   font-weight: 600;
 }
 
+.brand span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .brand .icon {
   width: 20px;
   height: 20px;
 }
 
-.book-list {
-  border-top: 1px solid var(--vscode-panel-border);
+.import-button,
+.toolbar .icon-button {
+  height: var(--toolbar-action-height);
+  border: var(--toolbar-action-border-width) solid transparent;
+  border-radius: var(--toolbar-action-radius);
+  color: var(--vscode-descriptionForeground);
+  background: transparent;
 }
 
-.book-row,
-.import-row {
+.import-button {
+  flex: none;
+  padding: 0 8px;
+  cursor: pointer;
+  font-size: var(--vscode-fontSize-label1, 11px);
+  line-height: 18px;
+}
+
+.import-button:hover:not(:disabled),
+.toolbar .icon-button:hover:not(:disabled) {
+  border-color: var(--vscode-menubar-selectionBorder, transparent);
+  color: var(--vscode-menubar-selectionForeground, var(--vscode-foreground));
+  background: var(--vscode-menubar-selectionBackground, var(--vscode-toolbar-hoverBackground));
+}
+
+.import-button:focus-visible,
+.toolbar .icon-button:focus-visible {
+  border-color: var(--vscode-focusBorder);
+  color: var(--vscode-menubar-selectionForeground, var(--vscode-foreground));
+  background: var(--vscode-menubar-selectionBackground, var(--vscode-toolbar-hoverBackground));
+  outline: none;
+}
+
+.import-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.book-list {
+  min-height: 0;
+  overflow: auto;
+}
+
+.book-row {
   display: flex;
   width: 100%;
   min-height: 40px;
@@ -124,14 +207,11 @@ button {
 }
 
 .book-row:hover,
-.book-row:focus-within,
-.import-row:hover,
-.import-row:focus-visible {
+.book-row:focus-within {
   background: var(--vscode-list-hoverBackground);
 }
 
-.book-row:focus-visible,
-.import-row:focus-visible {
+.book-row:focus-visible {
   outline: 1px solid var(--vscode-focusBorder);
   outline-offset: -1px;
 }
@@ -152,13 +232,6 @@ button {
 .delete-button.armed {
   color: var(--vscode-errorForeground);
   background: color-mix(in srgb, var(--vscode-errorForeground) 14%, transparent);
-}
-
-.import-row {
-  justify-content: flex-start;
-  padding: 0 10px;
-  color: var(--vscode-descriptionForeground);
-  cursor: pointer;
 }
 
 .reader-view {
@@ -184,8 +257,8 @@ button {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 2px;
-  padding: 0 5px;
+  gap: 4px;
+  padding: 0 4px;
 }
 
 .toolbar-group:first-child {
@@ -204,13 +277,7 @@ button {
 }
 
 .toolbar .icon-button {
-  width: 22px;
-  height: 22px;
-  border-radius: 2px;
-}
-
-.toolbar .icon-button:hover:not(:disabled) {
-  background: var(--vscode-statusBarItem-hoverBackground, var(--vscode-toolbar-hoverBackground));
+  width: var(--toolbar-action-height);
 }
 
 .toolbar .icon {
@@ -221,7 +288,6 @@ button {
 .reading-scroller {
   min-height: 0;
   overflow: auto;
-  scrollbar-gutter: stable;
 }
 
 .reading-content {
@@ -263,7 +329,6 @@ button {
   width: var(--sidebar-width);
   border-color: var(--vscode-panel-border);
   background: var(--vscode-sideBar-background, var(--vscode-editor-background));
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
   transition: transform 140ms ease;
 }
 

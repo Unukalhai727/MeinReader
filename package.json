@@ -3,7 +3,7 @@
   "displayName": "梅茵阅读器",
   "icon": "public/Book.png",
   "description": "显示在 VS Code 底部面板中的本地极简 TXT 阅读器。",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "unukalhai727",
   "repository": {
     "type": "git",
@@ -17,6 +17,9 @@
     "Other"
   ],
   "main": "./dist/extension.js",
+  "extensionKind": [
+    "ui"
+  ],
   "contributes": {
     "viewsContainers": {
       "panel": [
