@@ -3,7 +3,7 @@
   "displayName": "梅茵阅读器",
   "icon": "public/Book.png",
   "description": "显示在 VS Code 底部面板中的本地极简 TXT 阅读器。",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "unukalhai727",
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "package": "npm run compile && vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "^24.19.2",
     "@types/vscode": "^1.95.0",
     "@vscode/vsce": "^3.6.0",
     "typescript": "^5.9.0"

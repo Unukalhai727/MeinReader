@@ -1,7 +1,7 @@
 import type { ChapterIndex } from './types';
 
 export const MAX_CHAPTER_LENGTH = 100_000;
-export const CHAPTER_PATTERN = /^[\t \u3000]*第[零〇一二三四五六七八九十百千万两\d]+[章回节卷部篇][^\r\n]*$/;
+export const CHAPTER_PATTERN = /^[\t \u3000]*第[零〇一二三四五六七八九十百千万两\d]+[章回节卷部篇集][^\r\n]*$/;
 
 interface ChapterStart {
   title: string;

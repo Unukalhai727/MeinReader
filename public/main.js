@@ -15,6 +15,27 @@
   let isLoading = false;
   let renderVersion = 0;
 
+  async function loadSourceHanSans() {
+    if (typeof FontFace !== 'function' || !document.fonts) {
+      vscode.postMessage({ type: 'sourceHanSansUnavailable' });
+      return;
+    }
+
+    const sourceHanSans = new FontFace(
+      'MeinReader Source Han Sans SC',
+      'local("Source Han Sans SC VF")',
+      { style: 'normal', weight: '250 900' },
+    );
+
+    try {
+      const loadedFont = await sourceHanSans.load();
+      document.fonts.add(loadedFont);
+      document.documentElement.classList.add('source-han-available');
+    } catch {
+      vscode.postMessage({ type: 'sourceHanSansUnavailable' });
+    }
+  }
+
   window.addEventListener('message', (event) => {
     const message = event.data;
     switch (message.type) {
@@ -553,5 +574,10 @@
     });
   }
 
-  vscode.postMessage({ type: 'ready' });
+  async function initialize() {
+    await loadSourceHanSans();
+    vscode.postMessage({ type: 'ready' });
+  }
+
+  void initialize();
 })();

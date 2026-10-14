@@ -1,3 +1,4 @@
+import { homedir } from 'node:os';
 import * as vscode from 'vscode';
 import { ReaderStorage } from './storage';
 import {
@@ -17,7 +18,11 @@ interface WebviewMessage {
 
 export class ReaderViewProvider implements vscode.WebviewViewProvider {
   static readonly viewType = 'meinReader.reader';
+  private static readonly sourceHanSansDownloadUrl = vscode.Uri.parse(
+    'https://github.com/adobe-fonts/source-han-sans/raw/release/Variable/OTF/SourceHanSansSC-VF.otf',
+  );
   private view?: vscode.WebviewView;
+  private hasWarnedMissingSourceHanSans = false;
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -56,6 +61,9 @@ export class ReaderViewProvider implements vscode.WebviewViewProvider {
       switch (message.type) {
         case 'ready':
           await this.sendLibrary();
+          break;
+        case 'sourceHanSansUnavailable':
+          await this.warnMissingSourceHanSans();
           break;
         case 'importBook':
           await this.importBook();
@@ -107,6 +115,7 @@ export class ReaderViewProvider implements vscode.WebviewViewProvider {
 
   private async importBook(): Promise<void> {
     const selected = await vscode.window.showOpenDialog({
+      defaultUri: vscode.Uri.file(homedir()),
       canSelectFiles: true,
       canSelectFolders: false,
       canSelectMany: false,
@@ -115,15 +124,32 @@ export class ReaderViewProvider implements vscode.WebviewViewProvider {
       title: '导入本地 TXT 书籍',
     });
 
-    if (!selected?.[0]) {
+    const source = selected?.[0];
+    if (!source) {
       await this.postMessage({ type: 'operationFailed' });
       return;
     }
 
-    const result = await this.storage.importBook(selected[0]);
+    await this.storage.importBook(source);
     await this.sendLibrary();
-    if (result.overwritten) {
-      await vscode.window.showInformationMessage(`已覆盖《${result.book.title}》，阅读进度已保留。`);
+  }
+
+  private async warnMissingSourceHanSans(): Promise<void> {
+    if (this.hasWarnedMissingSourceHanSans) {
+      return;
+    }
+    this.hasWarnedMissingSourceHanSans = true;
+
+    const downloadAction = '下载思源黑体';
+    const selected = await vscode.window.showInformationMessage(
+      '未检测到思源黑体 VF，已回退至系统中文字体。',
+      downloadAction,
+    );
+    if (selected === downloadAction) {
+      await vscode.env.openExternal(ReaderViewProvider.sourceHanSansDownloadUrl);
+      await vscode.window.showInformationMessage(
+        '安装思源黑体后，请关闭所有 VS Code 窗口并重新打开，以刷新字体缓存。',
+      );
     }
   }
 

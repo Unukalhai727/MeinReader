@@ -15,11 +15,6 @@ const LIBRARY_KEY = 'meinReader.library.v1';
 const PROGRESS_KEY = 'meinReader.progress.v1';
 const SETTINGS_KEY = 'meinReader.settings.v1';
 
-export interface ImportResult {
-  book: BookRecord;
-  overwritten: boolean;
-}
-
 export interface ReadingPayload {
   id: string;
   title: string;
@@ -50,7 +45,7 @@ export class ReaderStorage {
     return sanitizeReaderSettings(this.context.globalState.get<Partial<ReaderSettings>>(SETTINGS_KEY, {}));
   }
 
-  async importBook(uri: vscode.Uri): Promise<ImportResult> {
+  async importBook(uri: vscode.Uri): Promise<BookRecord> {
     return this.enqueue(async () => {
       const sourceFileName = path.basename(uri.fsPath);
       if (path.extname(sourceFileName).toLocaleLowerCase() !== '.txt') {
@@ -62,12 +57,16 @@ export class ReaderStorage {
         throw new Error('文件名不能作为有效书名。');
       }
 
-      const bytes = await vscode.workspace.fs.readFile(uri);
-      const decoded = decodeAndNormalize(bytes);
-      const chapters = buildChapterIndex(decoded);
       const id = createBookId(title);
       const records = this.getBooks();
       const existing = records.find((book) => book.id === id);
+      if (existing) {
+        throw new Error(`已存在同名书籍《${title}》，导入已取消。`);
+      }
+
+      const bytes = await vscode.workspace.fs.readFile(uri);
+      const decoded = decodeAndNormalize(bytes);
+      const chapters = buildChapterIndex(decoded);
       const bookDirectory = path.join(this.context.globalStorageUri.fsPath, 'books', id);
       const contentFileName = `content-${Date.now()}-${randomBytes(4).toString('hex')}.txt`;
       const contentPath = path.join(bookDirectory, contentFileName);
@@ -99,7 +98,7 @@ export class ReaderStorage {
       if (this.contentCache?.id === id) {
         this.contentCache = { id, contentFileName, text: decoded };
       }
-      return { book, overwritten: Boolean(existing) };
+      return book;
     });
   }
 
